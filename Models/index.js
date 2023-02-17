@@ -6,4 +6,8 @@ const { Cheese } = require("./Cheese");
 User.hasMany(Board);
 Board.belongsTo(User);
 
+// Board Cheese Many Many
+Board.belongsToMany(Cheese, { through: "CheeseBoard" });
+Cheese.belongsToMany(Board, { through: "CheeseBoard" });
+
 module.exports = { User, Board, Cheese };

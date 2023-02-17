@@ -1,3 +1,4 @@
+const { Association } = require("sequelize");
 const { sequelize } = require("./db");
 const { User, Board, Cheese } = require("./Models/index.js");
 
@@ -67,5 +68,42 @@ describe("Association Tests", () => {
     expect(user2boards.length).toBe(2);
     expect(user2boards[0] instanceof Board).toBeTruthy;
     expect(user2boards[0].type).toBe("french");
+  });
+
+  // CheeseBoard Test
+
+  test("CheeseBoard many-many", async () => {
+    await sequelize.sync({ force: true });
+
+    // CREATE TEST SUBJECT
+    const lancCheese = await Cheese.create({
+      title: "Lancashire",
+      description: "Finest",
+    });
+    const yorkCheese = await Cheese.create({
+      title: "Yorkshire",
+      description: "Rubbish",
+    });
+    const rosesBoard = await Board.create({
+      type: "County Cheese",
+      description: "BOTR",
+      rating: 4,
+    });
+    const boardOfTheRoses = await Board.create({
+      type: "Cheese County",
+      description: "Red > White",
+      rating: 5,
+    });
+    // Create Association
+    await boardOfTheRoses.addCheese([lancCheese, yorkCheese]);
+    // TEST 1
+    const fullBoardOfTheRoses = await boardOfTheRoses.getCheeses();
+    expect(fullBoardOfTheRoses.length).toBe(2);
+    // TEST 2
+    await rosesBoard.addCheese(lancCheese);
+    const rosesLancCheese = await lancCheese.getBoards();
+    expect(rosesLancCheese.length).toBe(2);
+    const rosesYorkCheese = await yorkCheese.getBoards();
+    expect(rosesYorkCheese.length).toBe(1);
   });
 });
